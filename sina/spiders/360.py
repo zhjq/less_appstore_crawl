@@ -96,7 +96,7 @@ class QihuSpider(scrapy.Spider):
             pingfen =''
 
         tag = response.xpath('//div[@class="app-tags"]//a/text()').extract()
-        tags=','.join(tag)
+        tags=','.join([i.strip() for i in tag])
 
         self.fileout.write(
             source + '\001' + name + '\001' + version + '\001' + category + '\001' + util.unify_data(time) + '\001' + size + '\001' + system + '\001' + text + '\001' + util.unify_download_count(download) + '\001' + pingfen + '\001' + tags

@@ -19,30 +19,6 @@ class YingyonghuiSpider(scrapy.Spider):
         'http://www.appchina.com/category/40.html',
     )
 
-    def get_text(self, response, rule, not_text=1):
-        if not_text:
-            try:
-                s = response.xpath(rule).extract()
-                if s:
-                    return s[0].replace('\n', ' ').replace('\r', '').strip()
-                return ''
-            except Exception ,e:
-                return ''
-        else:
-            try:
-                rule = rule + ' | ' + rule + '//*[text()]'
-                s = ''
-                ns = response.xpath(rule)
-                for n in ns:
-                    ts = n.xpath('text()').extract()
-                    for t in ts:
-                        m = t.replace('\n', ' ').replace('\r', '').strip()
-                        if m:
-                            s = s + m + ';'
-                return s
-            except Exception:
-                return ''
-
     def parse(self, response):
         cats = response.xpath('//div[@class="has-border classify"]/ul//li/a/@href').extract()[1:]
         for cat in cats:
@@ -60,29 +36,29 @@ class YingyonghuiSpider(scrapy.Spider):
 
         source = 'yingyonghui'
 
-        name = self.get_text(response, '//h1[@class="app-name"]/text()')
+        name = util.get_text(response, '//h1[@class="app-name"]/text()')
         if not name:
             return
 
-        version = self.get_text(response, '//div[@class="intro"]/p[1]/text()[2]')[3:]
+        version = util.get_text(response, '//div[@class="intro"]/p[1]/text()[2]')[3:]
 
-        first = self.get_text(response, '//div[@class="breadcrumb centre-content"]/a[2]/text()')
-        second = self.get_text(response, '//div[@class="breadcrumb centre-content"]/a[3]/text()')
+        first = util.get_text(response, '//div[@class="breadcrumb centre-content"]/a[2]/text()')
+        second = util.get_text(response, '//div[@class="breadcrumb centre-content"]/a[3]/text()')
         category = first + '-' + second
 
-        time = self.get_text(response, '//div[@class="intro"]/p[1]/text()')[3:]
+        time = util.get_text(response, '//div[@class="intro"]/p[1]/text()')[3:]
 
-        size = self.get_text(response, '//span[@class="app-statistic"]/text()[2]')
+        size = util.get_text(response, '//span[@class="app-statistic"]/text()[2]')
         try:
             size = size.split('大小：')[1].split(' 更新')[0]
         except Exception:
             size = ''
 
-        system = self.get_text(response, '//p[@class="art-content"][3]/text()[4]')[3:]
+        system = util.get_text(response, '//p[@class="art-content"][3]/text()[4]')[3:]
 
-        text = self.get_text(response, '//div[@class="main-info"]/p[1]',0)
+        text = util.get_text(response, '//div[@class="main-info"]/p[1]',0)
 
-        download = self.get_text(response, '//span[@class="app-statistic"]/text()')
+        download = util.get_text(response, '//span[@class="app-statistic"]/text()')
         try:
             download = download.split('下载')[0]
         except Exception:

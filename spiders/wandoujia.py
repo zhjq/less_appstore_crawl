@@ -19,32 +19,8 @@ class WandoujiaSpider(scrapy.Spider):
         'http://www.wandoujia.com/tag/game',
     )
 
-    def get_text(self, response, rule, not_text=1):
-        if not_text:
-            try:
-                s = response.xpath(rule).extract()
-                if s:
-                    return s[0].replace('\n', ' ').replace('\r', '').strip()
-                return ''
-            except Exception ,e:
-                return ''
-        else:
-            try:
-                rule = rule + ' | ' + rule + '//*[text()]'
-                s = ''
-                ns = response.xpath(rule)
-                for n in ns:
-                    ts = n.xpath('text()').extract()
-                    for t in ts:
-                        m = t.replace('\n', ' ').replace('\r', '').strip()
-                        if m:
-                            s = s + m + ';'
-                return s
-            except Exception:
-                return ''
-
     def parse(self, response):
-        first = self.get_text(response, '//span[@class="last"]/text()')[2:4]
+        first = util.get_text(response, '//span[@class="last"]/text()')[2:4]
         cats = response.xpath('//ul[@class="clearfix tag-box"]//li/a/span/text()').extract()
         for cat in cats:
             yield scrapy.Request('http://apps.wandoujia.com/api/v1/apps?tag='+cat+'&max=60&start=0&opt_fields=apps.packageName', callback = self.parse_page, meta={'cat':cat,'first':first})
@@ -68,25 +44,25 @@ class WandoujiaSpider(scrapy.Spider):
 
         source = 'wandoujia'
 
-        name = self.get_text(response, '//p[@class="app-name"]/span/text()')
+        name = util.get_text(response, '//p[@class="app-name"]/span/text()')
         if not name:
             return
 
-        version = self.get_text(response, '//dl[@class="infos-list"]/dd[4]/text()')
+        version = util.get_text(response, '//dl[@class="infos-list"]/dd[4]/text()')
 
         first = response.meta['first']
-        second = self.get_text(response, '//div[@class="crumb"]/div[2]/a/span/text()')
+        second = util.get_text(response, '//div[@class="crumb"]/div[2]/a/span/text()')
         category = first + '-' + second
 
-        time = self.get_text(response, '//time[@id="baidu_time"]/text()')
+        time = util.get_text(response, '//time[@id="baidu_time"]/text()')
 
-        size = self.get_text(response, '//dl[@class="infos-list"]/dd[1]/text()')
+        size = util.get_text(response, '//dl[@class="infos-list"]/dd[1]/text()')
 
-        system = self.get_text(response, '//dl[@class="infos-list"]/dd[5]/text()')
+        system = util.get_text(response, '//dl[@class="infos-list"]/dd[5]/text()')
 
-        text = self.get_text(response, '//div[@itemprop="description"]',0)
+        text = util.get_text(response, '//div[@itemprop="description"]',0)
 
-        download = self.get_text(response, '//i[@itemprop="interactionCount"]/@content')
+        download = util.get_text(response, '//i[@itemprop="interactionCount"]/@content')
 
         pingfen = ''
 

@@ -34,30 +34,6 @@ class PpSpider(scrapy.Spider):
         'http://android.25pp.com/game/2007_0_0_1.html',
         'http://android.25pp.com/game/2008_0_0_1.html',
     )
-
-    def get_text(self, response, rule, not_text=1):
-        if not_text:
-            try:
-                s = response.xpath(rule).extract()
-                if s:
-                    return s[0].replace('\n', ' ').replace('\r', '').strip()
-                return ''
-            except Exception ,e:
-                return ''
-        else:
-            try:
-                rule = rule + ' | ' + rule + '//*[text()]'
-                s = ''
-                ns = response.xpath(rule)
-                for n in ns:
-                    ts = n.xpath('text()').extract()
-                    for t in ts:
-                        m = t.replace('\n', ' ').replace('\r', '').strip()
-                        if m:
-                            s = s + m + ';'
-                return s
-            except Exception:
-                return ''
 	
     def parse(self, response):
         at = response.xpath('//dl[@id="toggle"]/dt/a/@href').extract()[0]
@@ -78,27 +54,27 @@ class PpSpider(scrapy.Spider):
 
         source = '25pp'
 
-        name = self.get_text(response, '//div[@class="title-stat"]/div[@class="txt"]/h1/text()')
+        name = util.get_text(response, '//div[@class="title-stat"]/div[@class="txt"]/h1/text()')
         if not name:
             return
 
-        version = self.get_text(response, '//div[@class="title-stat"]/div[@class="txt"]/ul/li[1]/text()')[3:]
+        version = util.get_text(response, '//div[@class="title-stat"]/div[@class="txt"]/ul/li[1]/text()')[3:]
 
-        first = self.get_text(response, '//div[@class="location"]/a[2]/text()')
-        second = self.get_text(response, '//div[@class="title-stat"]/div[@class="txt"]/ul/li[2]/text()')
+        first = util.get_text(response, '//div[@class="location"]/a[2]/text()')
+        second = util.get_text(response, '//div[@class="title-stat"]/div[@class="txt"]/ul/li[2]/text()')
         category = first + '-' + second
 
         time = ''
 
-        size = self.get_text(response, '//div[@class="title-stat"]/div[@class="txt"]/ul/li[3]/text()')[3:]
+        size = util.get_text(response, '//div[@class="title-stat"]/div[@class="txt"]/ul/li[3]/text()')[3:]
 
-        system = self.get_text(response, '//div[@class="title-stat"]/div[@class="txt"]/ul/li[5]/text()')[5:]
+        system = util.get_text(response, '//div[@class="title-stat"]/div[@class="txt"]/ul/li[5]/text()')[5:]
 
-        text = self.get_text(response, '//div[@class="conTxt"][1]',0)
+        text = util.get_text(response, '//div[@class="conTxt"][1]',0)
 
-        download = self.get_text(response, '//li[@class="borderR"]/span/text()')
+        download = util.get_text(response, '//li[@class="borderR"]/span/text()')
 
-        pingfen = self.get_text(response, '//div[@class="downMunber"]/ul/li[3]/span/text()')
+        pingfen = util.get_text(response, '//div[@class="downMunber"]/ul/li[3]/span/text()')
         try:
             pingfen = str(float(pingfen)*20)
         except Exception:

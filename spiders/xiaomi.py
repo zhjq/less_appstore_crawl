@@ -18,30 +18,6 @@ class XiaomiSpider(scrapy.Spider):
         'http://app.mi.com',
     )
 
-    def get_text(self, response, rule, not_text=1):
-        if not_text:
-            try:
-                s = response.xpath(rule).extract()
-                if s:
-                    return s[0].replace('\n', ' ').replace('\r', '').strip()
-                return ''
-            except Exception ,e:
-                return ''
-        else:
-            try:
-                rule = rule + ' | ' + rule + '//*[text()]'
-                s = ''
-                ns = response.xpath(rule)
-                for n in ns:
-                    ts = n.xpath('text()').extract()
-                    for t in ts:
-                        m = t.replace('\n', ' ').replace('\r', '').strip()
-                        if m:
-                            s = s + m + ';'
-                return s
-            except Exception:
-                return ''
-	
     def parse(self, response):
         soft_cats = response.xpath('//ul[@class="category-list"][1]//li/a/@href').extract()
         for cat in soft_cats:
@@ -69,27 +45,27 @@ class XiaomiSpider(scrapy.Spider):
 
         source = 'xiaomi'
 
-        name = self.get_text(response, '//div[@class="intro-titles"]/h3/text()')
+        name = util.get_text(response, '//div[@class="intro-titles"]/h3/text()')
         if not name:
             return
 
-        version = self.get_text(response, '//ul[@class=" cf"]/li[4]/text()')
+        version = util.get_text(response, '//ul[@class=" cf"]/li[4]/text()')
 
         first = response.meta['first']
-        second = self.get_text(response, '//div[@class="bread-crumb"]/ul/li[2]/a/text()')
+        second = util.get_text(response, '//div[@class="bread-crumb"]/ul/li[2]/a/text()')
         category = first + '-' + second
 
-        time = self.get_text(response, '//ul[@class=" cf"]/li[6]/text()')
+        time = util.get_text(response, '//ul[@class=" cf"]/li[6]/text()')
 
-        size = self.get_text(response, '//ul[@class=" cf"]/li[2]/text()')
+        size = util.get_text(response, '//ul[@class=" cf"]/li[2]/text()')
 
         system = ''
 
-        text = self.get_text(response, '//p[@class="pslide"]',0)
+        text = util.get_text(response, '//p[@class="pslide"]',0)
 
         download = ''
 
-        pingfen = self.get_text(response, '//div[@class="star1-empty"]/div/@class')
+        pingfen = util.get_text(response, '//div[@class="star1-empty"]/div/@class')
         try:
             pingfen = str(float(pingfen.split('star1-hover star1-')[1])*10)
         except Exception:

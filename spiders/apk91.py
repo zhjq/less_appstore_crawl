@@ -19,30 +19,6 @@ class Apk91Spider(scrapy.Spider):
         'http://apk.91.com/soft/',
     )
 
-    def get_text(self, response, rule, not_text=1):
-        if not_text:
-            try:
-                s = response.xpath(rule).extract()
-                if s:
-                    return s[0].replace('\n', ' ').replace('\r', '').strip()
-                return ''
-            except Exception ,e:
-                return ''
-        else:
-            try:
-                rule = rule + ' | ' + rule + '//*[text()]'
-                s = ''
-                ns = response.xpath(rule)
-                for n in ns:
-                    ts = n.xpath('text()').extract()
-                    for t in ts:
-                        m = t.replace('\n', ' ').replace('\r', '').strip()
-                        if m:
-                            s = s + m + ';'
-                return s
-            except Exception:
-                return ''
-
     def parse(self, response):
         cats = response.xpath('//ul[@class="cate_list nav-content"]//li/a/@href').extract()[1:]
         for cat in cats:
@@ -58,7 +34,7 @@ class Apk91Spider(scrapy.Spider):
 
     def parse_page(self, response):
         app_list = response.xpath('//div[@class="topic_before"]/a/@href').extract()
-        cat = self.get_text(response, '//div[@class="l_box_title"]/h3/text()')
+        cat = util.get_text(response, '//div[@class="l_box_title"]/h3/text()')
         for i in app_list:
             yield scrapy.Request('http://apk.91.com'+i, callback=self.parse_item, meta={'cat':cat})
 	
@@ -66,27 +42,27 @@ class Apk91Spider(scrapy.Spider):
 
         source = 'apk91'
 
-        name = self.get_text(response, '//h1[@class="ff f20 fb fl"]/text()')
+        name = util.get_text(response, '//h1[@class="ff f20 fb fl"]/text()')
         if not name:
             return
 
-        version = self.get_text(response, '//ul[@class="s_info"]/li[1]/text()')[3:]
+        version = util.get_text(response, '//ul[@class="s_info"]/li[1]/text()')[3:]
 
-        first = self.get_text(response, '//div[@class="crumb clearfix"]/a[2]/text()')
+        first = util.get_text(response, '//div[@class="crumb clearfix"]/a[2]/text()')
         second = response.meta['cat']
         category = first + '-' + second
 
-        time = self.get_text(response, '//ul[@class="s_info"]/li[5]/text()')[5:15]
+        time = util.get_text(response, '//ul[@class="s_info"]/li[5]/text()')[5:15]
 
-        size = self.get_text(response, '//ul[@class="s_info"]/li[3]/text()')[5:]
+        size = util.get_text(response, '//ul[@class="s_info"]/li[3]/text()')[5:]
 
-        system = self.get_text(response, '//ul[@class="s_info"]/li[4]/text()')[5:]
+        system = util.get_text(response, '//ul[@class="s_info"]/li[4]/text()')[5:]
 
-        text = self.get_text(response, '//div[@class="o-content"]',0)
+        text = util.get_text(response, '//div[@class="o-content"]',0)
 
-        download = self.get_text(response, '//ul[@class="s_info"]/li[2]/text()')
+        download = util.get_text(response, '//ul[@class="s_info"]/li[2]/text()')
 
-        pingfen = self.get_text(response, '//div[@class="s_intro_pic fl"]/span[@class="spr star"]/a/@class')
+        pingfen = util.get_text(response, '//div[@class="s_intro_pic fl"]/span[@class="spr star"]/a/@class')
         try:
             pingfen = str(float(pingfen.split('w')[1].split(' ')[0])*20)
         except Exception:

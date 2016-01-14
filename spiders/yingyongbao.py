@@ -13,36 +13,12 @@ import util
 class YingyongbaoSpider(scrapy.Spider):
     name = "yingyongbao"
     allowed_domains = ["qq.com"]
-    fileout = codecs.open('yingyongbao.txt', 'w', 'utf-8')
+    fileout = codecs.open('yingyongbao.txt', 'a', 'utf-8')
     start_urls = (
         'http://sj.qq.com/myapp/category.htm?orgame=1',
         'http://sj.qq.com/myapp/category.htm?orgame=2',
 
     )
-
-    def get_text(self, response, rule, not_text=1):
-        if not_text:
-            try:
-                s = response.xpath(rule).extract()
-                if s:
-                    return s[0].replace('\n', ' ').replace('\r', '').strip()
-                return ''
-            except Exception ,e:
-                return ''
-        else:
-            try:
-                rule = rule + ' | ' + rule + '//*[text()]'
-                s = ''
-                ns = response.xpath(rule)
-                for n in ns:
-                    ts = n.xpath('text()').extract()
-                    for t in ts:
-                        m = t.replace('\n', ' ').replace('\r', '').strip()
-                        if m:
-                            s = s + m + ';'
-                return s
-            except Exception:
-                return ''
 
     def parse(self, response):
         urls = response.xpath('//ul[@data-modname="cates"]/li/a/@href').extract()
@@ -83,7 +59,7 @@ class YingyongbaoSpider(scrapy.Spider):
 
         system = ''
 
-        text = self.get_text(response, '//div[@class="det-intro-text"]',0)
+        text = util.get_text(response, '//div[@class="det-intro-text"]',0)
 
         download = str(response.meta['appdown'])
 

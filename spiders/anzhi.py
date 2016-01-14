@@ -47,32 +47,8 @@ class AnzhiSpider(scrapy.Spider):
         'http://www.anzhi.com/sort_57_1_hot.html',
     )
 
-    def get_text(self, response, rule, not_text=1):
-        if not_text:
-            try:
-                s = response.xpath(rule).extract()
-                if s:
-                    return s[0].replace('\n', ' ').replace('\r', '').strip()
-                return ''
-            except Exception ,e:
-                return ''
-        else:
-            try:
-                rule = rule + ' | ' + rule + '//*[text()]'
-                s = ''
-                ns = response.xpath(rule)
-                for n in ns:
-                    ts = n.xpath('text()').extract()
-                    for t in ts:
-                        m = t.replace('\n', ' ').replace('\r', '').strip()
-                        if m:
-                            s = s + m + ';'
-                return s
-            except Exception:
-                return ''
-
     def parse(self, response):
-        cate = self.get_text(response, '//li[@class="current"]/a/text()')[2:]
+        cate = util.get_text(response, '//li[@class="current"]/a/text()')[2:]
         app_list = response.xpath('//div[@class="app_list border_three"]//div[@class="app_info"]//a/@href').extract()
         for i in app_list:
             yield scrapy.Request('http://www.anzhi.com' + i, callback=self.parse_item, meta={'cate':cate})
@@ -86,11 +62,11 @@ class AnzhiSpider(scrapy.Spider):
 
         source = 'anzhi'
 
-        name = self.get_text(response, '//div[@class="detail_line"]/h3//text()')
+        name = util.get_text(response, '//div[@class="detail_line"]/h3//text()')
         if not name:
             return
 
-        version = self.get_text(response, '//div[@class="detail_line"]/span//text()')[1:-1]
+        version = util.get_text(response, '//div[@class="detail_line"]/span//text()')[1:-1]
 
         first = response.meta['cate']
 
@@ -111,9 +87,9 @@ class AnzhiSpider(scrapy.Spider):
 
         category = first + '-' + second
 
-        text = self.get_text(response, '//div[@class="app_detail_infor"]',0)
+        text = util.get_text(response, '//div[@class="app_detail_infor"]',0)
 
-        pingfen = self.get_text(response, '//div[@id="stars_detail"]/@style')
+        pingfen = util.get_text(response, '//div[@id="stars_detail"]/@style')
         p = pingfen.split('-')
         if len(p) == 2:
             pingfen = '0.0'

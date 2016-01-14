@@ -18,31 +18,7 @@ class HaozhuoSpider(scrapy.Spider):
         'http://apk.3310.com/game/',
         'http://apk.3310.com/apps/',
     )
-
-    def get_text(self, response, rule, not_text=1):
-        if not_text:
-            try:
-                s = response.xpath(rule).extract()
-                if s:
-                    return s[0].replace('\n', ' ').replace('\r', '').strip()
-                return ''
-            except Exception ,e:
-                return ''
-        else:
-            try:
-                rule = rule + ' | ' + rule + '//*[text()]'
-                s = ''
-                ns = response.xpath(rule)
-                for n in ns:
-                    ts = n.xpath('text()').extract()
-                    for t in ts:
-                        m = t.replace('\n', ' ').replace('\r', '').strip()
-                        if m:
-                            s = s + m + ';'
-                return s
-            except Exception:
-                return ''
-
+    
     def parse(self, response):
         cats = response.xpath('//div[@class="apply-menu"]/ul//li/a/@href').extract()
         for cat in cats:
@@ -63,7 +39,7 @@ class HaozhuoSpider(scrapy.Spider):
 
         source = '3310'
 
-        name_version = self.get_text(response, '//div[@class="cont"]/h2/text()')
+        name_version = util.get_text(response, '//div[@class="cont"]/h2/text()')
         if not name_version:
             return
         
@@ -71,21 +47,21 @@ class HaozhuoSpider(scrapy.Spider):
         version = ns.pop(-1)
         name = ' '.join(ns)
 
-        first = self.get_text(response, '//div[@class="guide"]/a[3]/text()')
-        second = self.get_text(response, '//div[@class="guide"]/a[4]/text()')
+        first = util.get_text(response, '//div[@class="guide"]/a[3]/text()')
+        second = util.get_text(response, '//div[@class="guide"]/a[4]/text()')
         category = first + '-' + second
 
-        time = self.get_text(response, '//div[@class="cont"]/p[2]/text()')[5:]
+        time = util.get_text(response, '//div[@class="cont"]/p[2]/text()')[5:]
 
-        size = self.get_text(response, '//div[@class="cont"]/p[1]/span/text()')[3:]
+        size = util.get_text(response, '//div[@class="cont"]/p[1]/span/text()')[3:]
 
-        system = self.get_text(response, '//div[@class="cont"]/p[3]/span/text()')[5:]
+        system = util.get_text(response, '//div[@class="cont"]/p[3]/span/text()')[5:]
 
-        text = self.get_text(response, '//div[@class="pictxt item"][not(@style)]',0)
+        text = util.get_text(response, '//div[@class="pictxt item"][not(@style)]',0)
 
-        download = self.get_text(response, '//span[@id="downnum"]/text()')
+        download = util.get_text(response, '//span[@id="downnum"]/text()')
 
-        pingfen = self.get_text(response, '//div[@class="score"]/span/text()')
+        pingfen = util.get_text(response, '//div[@class="score"]/span/text()')
         try:
             pingfen = str(float(pingfen)*20)
         except Exception:

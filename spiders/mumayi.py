@@ -18,30 +18,6 @@ class MumayiSpider(scrapy.Spider):
         'http://www.mumayi.com/update/',
     )
 
-    def get_text(self, response, rule, not_text=1):
-        if not_text:
-            try:
-                s = response.xpath(rule).extract()
-                if s:
-                    return s[0].replace('\n', ' ').replace('\r', '').strip()
-                return ''
-            except Exception ,e:
-                return ''
-        else:
-            try:
-                rule = rule + ' | ' + rule + '//*[text()]'
-                s = ''
-                ns = response.xpath(rule)
-                for n in ns:
-                    ts = n.xpath('text()').extract()
-                    for t in ts:
-                        m = t.replace('\n', ' ').replace('\r', '').strip()
-                        if m:
-                            s = s + m + ';'
-                return s
-            except Exception:
-                return ''
-
     def parse(self, response):
         import datetime
 
@@ -61,28 +37,28 @@ class MumayiSpider(scrapy.Spider):
 
         source = 'mumayi'
 
-        name_version = self.get_text(response, '//h1[@class="iappname hidden fl"]/text()')
+        name_version = util.get_text(response, '//h1[@class="iappname hidden fl"]/text()')
         if not name_version:
             return
         sn = name_version.split('V')
         version = sn.pop(-1) if len(sn)>1 else ''
         name = 'V'.join(sn) if sn else name_version
 
-        first = self.get_text(response, '//div[@id="classlists"]/a[2]/text()')[:2]
-        second = self.get_text(response, '//div[@id="classlists"]/a[3]/text()')
+        first = util.get_text(response, '//div[@id="classlists"]/a[2]/text()')[:2]
+        second = util.get_text(response, '//div[@id="classlists"]/a[3]/text()')
         category = first + '-' + second
 
         time = response.meta['time']
 
-        size = self.get_text(response, '//span[text()="程序大小："]/../text()')
+        size = util.get_text(response, '//span[text()="程序大小："]/../text()')
 
-        system = self.get_text(response, '//div[@class="sel_text fl"]/text()')
+        system = util.get_text(response, '//div[@class="sel_text fl"]/text()')
 
-        text = self.get_text(response, '//ul[@class="author"]/..//p[position()<last()]',0)
+        text = util.get_text(response, '//ul[@class="author"]/..//p[position()<last()]',0)
 
         download = ''
 
-        pingfen = self.get_text(response, '//div[@id="starlist"]/@class')
+        pingfen = util.get_text(response, '//div[@id="starlist"]/@class')
         try:
             pingfen = str(float(pingfen.split('now')[1])*2)
         except Exception:

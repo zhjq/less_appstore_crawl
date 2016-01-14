@@ -19,30 +19,6 @@ class QihuSpider(scrapy.Spider):
         'http://zhushou.360.cn/list/index/cid/2/',
     )
 
-    def get_text(self, response, rule, not_text=1):
-        if not_text:
-            try:
-                s = response.xpath(rule).extract()
-                if s:
-                    return s[0].replace('\n', ' ').replace('\r', '').strip()
-                return ''
-            except Exception ,e:
-                return ''
-        else:
-            try:
-                rule = rule + ' | ' + rule + '//*[text()]'
-                s = ''
-                ns = response.xpath(rule)
-                for n in ns:
-                    ts = n.xpath('text()').extract()
-                    for t in ts:
-                        m = t.replace('\n', ' ').replace('\r', '').strip()
-                        if m:
-                            s = s + m + ';'
-                return s
-            except Exception:
-                return ''
-
     def parse(self, response):
         type_list = response.xpath('//ul[@class="select"]/li[1]/a[position()>1]/@href').extract()
         categroy = response.xpath('//ul[@class="select"]/li[1]/a[position()>1]/text()').extract()
@@ -69,27 +45,27 @@ class QihuSpider(scrapy.Spider):
 
         source = '360'
 
-        name = self.get_text(response, '//h2[@id="app-name"]/span/text()')
+        name = util.get_text(response, '//h2[@id="app-name"]/span/text()')
         if not name:
             return
 
-        version = self.get_text(response, '//div[@class="breif"]/div[@class="base-info"]/table/tbody/tr[2]/td[1]/text()')
+        version = util.get_text(response, '//div[@class="breif"]/div[@class="base-info"]/table/tbody/tr[2]/td[1]/text()')
 
-        first = self.get_text(response, '//div[@class="nav"]/ul/li[@class="cur"]/a/text()')[1:]
+        first = util.get_text(response, '//div[@class="nav"]/ul/li[@class="cur"]/a/text()')[1:]
         second = response.meta['categroy']
         category = first + '-' + second
 
-        time = self.get_text(response, '//div[@class="breif"]/div[@class="base-info"]/table/tbody/tr[1]/td[2]/text()')
+        time = util.get_text(response, '//div[@class="breif"]/div[@class="base-info"]/table/tbody/tr[1]/td[2]/text()')
 
-        size = self.get_text(response, '//div[@class="pf"]/span[@class="s-3"][2]/text()')
+        size = util.get_text(response, '//div[@class="pf"]/span[@class="s-3"][2]/text()')
 
-        system = self.get_text(response, '//div[@class="breif"]/div[@class="base-info"]/table/tbody/tr[2]/td[2]/text()')
+        system = util.get_text(response, '//div[@class="breif"]/div[@class="base-info"]/table/tbody/tr[2]/td[2]/text()')
 
-        text = self.get_text(response, '//div[@class="breif"]',0)
+        text = util.get_text(response, '//div[@class="breif"]',0)
 
-        download = self.get_text(response, '//div[@class="pf"]/span[@class="s-3"][1]/text()')
+        download = util.get_text(response, '//div[@class="pf"]/span[@class="s-3"][1]/text()')
 
-        pingfen = self.get_text(response, '//div[@class="pf"]/span[@class="s-1 js-votepanel"]/text()')
+        pingfen = util.get_text(response, '//div[@class="pf"]/span[@class="s-1 js-votepanel"]/text()')
         try:
             pingfen = str(float(pingfen)*10)
         except Exception:

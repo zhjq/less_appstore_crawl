@@ -4,6 +4,30 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
+def get_text(response, rule, not_text=1):
+    if not_text:
+        try:
+            s = response.xpath(rule).extract()
+            if s:
+                return s[0].replace('\n', ' ').replace('\r', '').replace('\u2028','').replace('\u2029','').strip()
+            return ''
+        except Exception ,e:
+            return ''
+    else:
+        try:
+            rule = rule + ' | ' + rule + '//*[text()]'
+            s = ''
+            ns = response.xpath(rule)
+            for n in ns:
+                ts = n.xpath('text()').extract()
+                for t in ts:
+                    m = t.replace('\n', ' ').replace('\r', '').replace('\u2028','').replace('\u2029','').strip()
+                    if m:
+                        s = s + m + ';'
+            return s
+        except Exception:
+            return ''
+
 #统一日期格式
 def unify_data(data_str):
     data_str = data_str.replace("年","-")

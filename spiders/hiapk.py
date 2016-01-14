@@ -19,31 +19,6 @@ class HiapkSpider(scrapy.Spider):
         'http://apk.hiapk.com/games',
     )
 
-
-    def get_text(self, response, rule, not_text=1):
-        if not_text:
-            try:
-                s = response.xpath(rule).extract()
-                if s:
-                    return s[0].replace('\n', ' ').replace('\r', '').strip()
-                return ''
-            except Exception ,e:
-                return ''
-        else:
-            try:
-                rule = rule + ' | ' + rule + '//*[text()]'
-                s = ''
-                ns = response.xpath(rule)
-                for n in ns:
-                    ts = n.xpath('text()').extract()
-                    for t in ts:
-                        m = t.replace('\n', ' ').replace('\r', '').strip()
-                        if m:
-                            s = s + m + ';'
-                return s
-            except Exception:
-                return ''
-
     def parse(self, response):
         cats = response.xpath('//ul[@id="cateListUl"]//li/a/@href').extract() 
         for cat in cats:
@@ -62,7 +37,7 @@ class HiapkSpider(scrapy.Spider):
 
         source = 'hiapk'
 
-        name_and_version = self.get_text(response, "//div[@id='appSoftName']/text()")
+        name_and_version = util.get_text(response, "//div[@id='appSoftName']/text()")
         try:
             version = name_and_version.split('(')[1].split(')')[0]
             name = name_and_version.split('(')[0]
@@ -72,21 +47,21 @@ class HiapkSpider(scrapy.Spider):
         if not name:
             return
 
-        first = self.get_text(response, "//a[@id='categoryParent']/text()")
-        second = self.get_text(response, "//a[@id='categoryLink']/text()")
+        first = util.get_text(response, "//a[@id='categoryParent']/text()")
+        second = util.get_text(response, "//a[@id='categoryLink']/text()")
         category = first + '-' + second
 
-        time = self.get_text(response, '//div[@class="code_box_border"]/div[@class="line_content"][7]/span[2]/text()')
+        time = util.get_text(response, '//div[@class="code_box_border"]/div[@class="line_content"][7]/span[2]/text()')
 
-        size = self.get_text(response, '//span[@id="appSize"]/text()')
+        size = util.get_text(response, '//span[@id="appSize"]/text()')
 
-        system = self.get_text(response, '//span[@class="font14 detailMiniSdk d_gj_line left"]/text()')
+        system = util.get_text(response, '//span[@class="font14 detailMiniSdk d_gj_line left"]/text()')
 
-        text = self.get_text(response, '//pre[@id="softIntroduce"]',0)
+        text = util.get_text(response, '//pre[@id="softIntroduce"]',0)
 
-        download = self.get_text(response, '//div[@class="code_box_border"]/div[@class="line_content"][2]/span[2]/text()')
+        download = util.get_text(response, '//div[@class="code_box_border"]/div[@class="line_content"][2]/span[2]/text()')
 
-        pingfen = self.get_text(response, '//div[@id="appIconTips"]/div[1]/@class')
+        pingfen = util.get_text(response, '//div[@id="appIconTips"]/div[1]/@class')
         try:
             pingfen = str(float(pingfen.split(" ")[2].split("_")[2])*2)
         except Exception:
